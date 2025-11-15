@@ -1,0 +1,9 @@
+numpy 
+pandas
+matplotlib
+tqdm
+scikit-learn
+joblib
+google-cloud-storage
+notebook
+opencv-python
