@@ -12,3 +12,5 @@ ALL+MATERIALS+-+1.zip
 ALL+MATERIALS+-+1/*
 key.json
 keys/*
+artifacts/*
+logs/*
