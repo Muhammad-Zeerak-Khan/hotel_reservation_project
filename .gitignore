@@ -12,7 +12,7 @@ ALL+MATERIALS+-+1.zip
 ALL+MATERIALS+-+1/*
 key.json
 keys/*
-artifacts/*
+artifacts/
 logs/*
 notebook/random_forest.pkl
 mlruns/*
