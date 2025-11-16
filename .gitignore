@@ -17,3 +17,4 @@ logs/*
 notebook/random_forest.pkl
 mlruns/*
 .env
+notes

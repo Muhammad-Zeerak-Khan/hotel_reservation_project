@@ -3,6 +3,8 @@ pipeline{
 
     environment {
         VENV_DIR = "venv"
+        GCP_PROJECT = "project-b389f8d5-a6f1-4e79-887"
+        GCLOUD_PATH = "/var/jenkins_home/google-cloud-sdk/bin"
     }
 
     stages{
@@ -27,5 +29,20 @@ pipeline{
                 }
             }
         }
+        stage('Building and pushing docker image to GCR'){
+            steps{
+                withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]){
+                    echo 'Building and pushing docker image to GCR'
+                    sh '''
+                    export PATH=$PATH:$(GCLOUD_PATH)
+                    gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                    gcloud config set project ${GCP_PROJECT}
+                    gcloud auth configure-docker --quiet
+                    docker build -t grc.io/{GCP_PROJECT}/hotel-reservation-project:latest .
+                    docker push grc.io/{GCP_PROJECT}/hotel-reservation-project:latest
+                    '''
+                }
+                }
+            }
+        }
     }
-}
