@@ -19,3 +19,4 @@ mlruns/*
 .env
 notes
 artifacts/models/lgbm_model.pkl
+README.md
