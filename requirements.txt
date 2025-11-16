@@ -6,6 +6,7 @@ scikit-learn
 joblib
 google-cloud-storage
 notebook
+flask
 opencv-python
 lightbgm 
 mlflow
