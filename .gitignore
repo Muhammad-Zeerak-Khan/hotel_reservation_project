@@ -14,3 +14,4 @@ key.json
 keys/*
 artifacts/*
 logs/*
+notebook/random_forest.pkl
