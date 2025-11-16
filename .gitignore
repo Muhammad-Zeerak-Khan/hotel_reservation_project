@@ -16,3 +16,4 @@ artifacts/*
 logs/*
 notebook/random_forest.pkl
 mlruns/*
+.env
