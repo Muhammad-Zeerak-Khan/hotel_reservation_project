@@ -1,8 +1,9 @@
 import os
-from typing import Any
 
 import joblib
 import lightgbm as lgb
+import mlflow
+import mlflow.sklearn
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import RandomizedSearchCV
 
@@ -124,28 +125,28 @@ class ModelTraining:
 
     def run(self):
         try:
-            # with mlflow.start_run():
-            #     logger.info("Starting our Model Training pipeline")
+            with mlflow.start_run():
+                logger.info("Starting our Model Training pipeline")
 
-            #     logger.info("Starting our MLFLOW experimentation")
+                logger.info("Starting our MLFLOW experimentation")
 
-            logger.info("Logging the training and testing datset to MLFLOW")
-            # mlflow.log_artifact(self.train_path, artifact_path="datasets")
-            # mlflow.log_artifact(self.test_path, artifact_path="datasets")
+                logger.info("Logging the training and testing dataset to MLFLOW")
+                mlflow.log_artifact(self.train_path, artifact_path="datasets")
+                mlflow.log_artifact(self.test_path, artifact_path="datasets")
 
-            X_train, y_train, X_test, y_test = self.load_and_split_data()
-            best_lgbm_model = self.train_lgbm(X_train, y_train)
-            metrics = self.evaluate_model(best_lgbm_model, X_test, y_test)
-            self.save_model(best_lgbm_model)
+                X_train, y_train, X_test, y_test = self.load_and_split_data()
+                best_lgbm_model = self.train_lgbm(X_train, y_train)
+                metrics = self.evaluate_model(best_lgbm_model, X_test, y_test)
+                self.save_model(best_lgbm_model)
 
-            logger.info("Logging the model into MLFLOW")
-            # mlflow.log_artifact(self.model_output_path)
+                logger.info("Logging the model into MLFLOW")
+                mlflow.log_artifact(self.model_output_path)
 
-            logger.info("Logging Params and metrics to MLFLOW")
-            # mlflow.log_params(best_lgbm_model.get_params())
-            # mlflow.log_metrics(metrics)
+                logger.info("Logging Params and metrics to MLFLOW")
+                mlflow.log_params(best_lgbm_model.get_params())
+                mlflow.log_metrics(metrics)
 
-            logger.info("Model Training sucesfullly completed")
+                logger.info("Model Training sucesfullly completed")
 
         except Exception as e:
             logger.error(f"Error in model training pipeline {e}")
