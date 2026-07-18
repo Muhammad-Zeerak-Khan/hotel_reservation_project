@@ -1,7 +1,7 @@
 [project]
 name = "hotel-reservation"
 version = "0.1.0"
-description = "Add your description here"
+description = "A project to determine whether the customer would cancel there reservation or not."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
