@@ -5,6 +5,8 @@ pipeline {
         VENV_DIR = 'venv'
         GCP_PROJECT = 'project-33b299d4-5c8b-49ce-a85'
         GCLOUD_PATH = '/var/jenkins_home/google-cloud-sdk/bin'
+        GOOGLE_APPLICATION_CREDENTIALS = '/var/jenkins_home/.config/gcloud/application_default_credentials.json'
+        IMAGE_NAME = 'gcr.io/project-33b299d4-5c8b-49ce-a85/hotel-reservation-project:v1'
     }
 
     stages {
@@ -13,43 +15,53 @@ pipeline {
                 script {
                     echo 'Cloning Github repo to Jenkins..........'
                     checkout scmGit(
-                        branches: [[name: '*/main']], 
-                        extensions: [], 
+                        branches: [[name: '*/main']],
+                        extensions: [],
                         userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/Muhammad-Zeerak-Khan/hotel_reservation_project.git']]
                     )
                 }
             }
         }
+
+        stage('Validate GCP credentials') {
+            steps {
+                sh '''
+                    set -e
+                    export PATH="$PATH:${GCLOUD_PATH}"
+
+                    test -f "$GOOGLE_APPLICATION_CREDENTIALS"
+                    gcloud auth application-default print-access-token >/dev/null
+                '''
+            }
+        }
+
         stage('Setup virtualenv and install dependencies') {
             steps {
                 echo 'Setting up the virtual env and installing dependencies'
                 sh '''
+                    set -e
                     python3 -m venv ${VENV_DIR}
                     . ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip
-                    pip install -e .
+                    python -m pip install --upgrade pip
+                    python -m pip install -e .
                 '''
             }
         }
 
         stage('Building and pushing docker image to GCR') {
             steps {
-                script {
-                    echo 'Building and pushing docker image to GCR'
-                    
-                    // Relying on globally configured GOOGLE_APPLICATION_CREDENTIALS
-                    sh '''
-                        export PATH=$PATH:${GCLOUD_PATH}
-                        
-                        # 1. Print ADC token and authenticate Docker directly
-                        gcloud auth application-default print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
-                        
-                        docker build -t gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1 .
-                        docker push gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1
-                    '''
-                }
+                sh '''
+                    set -e
+                    export PATH="$PATH:${GCLOUD_PATH}"
+                    export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+
+                    TOKEN="$(gcloud auth application-default print-access-token)"
+                    printf '%s' "$TOKEN" | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+
+                    docker build -t "${IMAGE_NAME}" .
+                    docker push "${IMAGE_NAME}"
+                '''
             }
         }
-
     }
 }

@@ -26,9 +26,19 @@ RUN apt-get update -y && \
 RUN groupadd -f docker && \
     usermod -aG docker jenkins
 
+# Install python3 and venv
+RUN apt-get install -y python3 python3-pip python3-venv
+
+# Create the symbolic link for future application command with python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+    
+
 # Create the Docker directory and volume for DinD
 RUN mkdir -p /var/lib/docker
 VOLUME /var/lib/docker
 
 # Switch back to the Jenkins user
 USER jenkins
+
+# Set the environment variable for Google Cloud
+ENV GOOGLE_APPLICATION_CREDENTIALS=/var/jenkins_home/.config/gcloud/application_default_credentials.json
