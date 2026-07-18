@@ -41,8 +41,8 @@ pipeline {
                     sh '''
                         export PATH=$PATH:${GCLOUD_PATH}
                         
-                        gcloud config set project ${GCP_PROJECT}
-                        gcloud auth configure-docker --quiet
+                        # 1. Print ADC token and authenticate Docker directly
+                        gcloud auth application-default print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
                         
                         docker build -t gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1 .
                         docker push gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1
