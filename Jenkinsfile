@@ -8,21 +8,18 @@ pipeline {
     }
 
     stages {
-        stage('Clone repository') {
+        stage('Cloning Github repo to Jenkins') {
             steps {
-                echo 'Cloning GitHub repository to Jenkins...'
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    extensions: [],
-                    userRemoteConfigs: [[
-                        credentialsId: 'github-token',
-                        url: 'https://github.com/Muhammad-Zeerak-Khan/hotel_reservation_project.git'
-                    ]]
-                ])
+                script {
+                    echo 'Cloning Github repo to Jenkins..........'
+                    checkout scmGit(
+                        branches: [[name: '*/main']], 
+                        extensions: [], 
+                        userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/Muhammad-Zeerak-Khan/hotel_reservation_project.git']]
+                    )
+                }
             }
         }
-
         stage('Setup virtualenv and install dependencies') {
             steps {
                 echo 'Setting up the virtual env and installing dependencies'
@@ -35,48 +32,24 @@ pipeline {
             }
         }
 
-        stage('Build and push Docker image to GCR') {
+        stage('Building and pushing docker image to GCR') {
             steps {
-                echo 'Building and pushing Docker image to GCR'
-                sh '''
-                    export PATH=$PATH:${GCLOUD_PATH}
-
-                    if [ -z "${GOOGLE_APPLICATION_CREDENTIALS}" ]; then
-                        echo "GOOGLE_APPLICATION_CREDENTIALS is not set"
-                        exit 1
-                    fi
-
-                    printf '%s' "${GOOGLE_APPLICATION_CREDENTIALS}" > /tmp/gcp-key.json
-                    gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
-                    gcloud config set project ${GCP_PROJECT}
-                    gcloud auth configure-docker --quiet
-                    docker build -t gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1 .
-                    docker push gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1
-                '''
+                script {
+                    echo 'Building and pushing docker image to GCR'
+                    
+                    // Relying on globally configured GOOGLE_APPLICATION_CREDENTIALS
+                    sh '''
+                        export PATH=$PATH:${GCLOUD_PATH}
+                        
+                        gcloud config set project ${GCP_PROJECT}
+                        gcloud auth configure-docker --quiet
+                        
+                        docker build -t gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1 .
+                        docker push gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1
+                    '''
+                }
             }
         }
 
-        stage('Deploy to Google Cloud Run') {
-            steps {
-                echo 'Deploying to Google Cloud Run...'
-                sh '''
-                    export PATH=$PATH:${GCLOUD_PATH}
-
-                    if [ -z "${GOOGLE_APPLICATION_CREDENTIALS}" ]; then
-                        echo "GOOGLE_APPLICATION_CREDENTIALS is not set"
-                        exit 1
-                    fi
-
-                    printf '%s' "${GOOGLE_APPLICATION_CREDENTIALS}" > /tmp/gcp-key.json
-                    gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
-                    gcloud config set project ${GCP_PROJECT}
-                    gcloud run deploy hotel-reservation-project \
-                        --image=gcr.io/${GCP_PROJECT}/hotel-reservation-project:v1 \
-                        --platform=managed \
-                        --region=us-central1 \
-                        --allow-unauthenticated
-                '''
-            }
-        }
     }
 }
