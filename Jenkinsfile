@@ -16,19 +16,19 @@ pipeline{
                 }
             }
         }
-    //     stage('Setting up the virtual env and installing the dependencies'){
-    //         steps{
-    //             script{
-    //                 echo 'Setting up the virtual env and installing the dependencies'
-    //                 sh '''
-    //                 python3 -m venv ${VENV_DIR}
-    //                 . ${VENV_DIR}/bin/activate
-    //                 pip install --upgrade pip
-    //                 pip install -e .
-    //                 '''
-    //             }
-    //         }
-    //     }
+        stage('Setting up the virtual env and installing the dependencies'){
+            steps{
+                script{
+                    echo 'Setting up the virtual env and installing the dependencies'
+                    sh '''
+                    python3 -m venv ${VENV_DIR}
+                    . ${VENV_DIR}/bin/activate
+                    pip install --upgrade pip
+                    pip install -e .
+                    '''
+                }
+            }
+        }
     //     stage('Building and pushing docker image to GCR'){
     //         steps{
     //             withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]){
