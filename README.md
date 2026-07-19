@@ -33,7 +33,7 @@ The entire application — from backend model training to the interactive predic
 The final prediction app is deployed to **GCP** with a simple, interactive HTML/CSS frontend.  
 Users can enter reservation details and instantly receive the cancellation prediction.
 
-🔗 **Live App URL:** *[project-link]((https://hotel-reservation-project-338014725385.europe-west3.run.app))*
+🔗 **Live App URL:** *[project-link](https://hotel-reservation-project-338014725385.europe-west3.run.app)*
 
 ---
 
