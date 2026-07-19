@@ -25,5 +25,5 @@ uv.lock
 __pycache__
 .mypy_cache
 .venv
-archive
 hotel_reservation.egg-info
+uv.lock
