@@ -5,9 +5,9 @@ pipeline{
         VENV_DIR = "venv"
         GCP_PROJECT = "project-33b299d4-5c8b-49ce-a85"
         GCLOUD_PATH = "/var/jenkins_home/google-cloud-sdk/bin"
-        AR_REGION= "europe-west3"
-        AR_REPO="hotel-reservation-project-repo"
-        IMAGE_NAME="hotel-reservation-project"
+        AR_REGION = "europe-west3"
+        AR_REPO = "hotel-reservation-project-repo"
+        IMAGE_NAME = "hotel-reservation-project"
     }
 
     stages{
@@ -32,7 +32,7 @@ pipeline{
                 }
             }
         }
-        stage('Building and pushing docker image to GCR'){
+        stage('Building and pushing docker image to Google Artifact Registry'){
             steps{
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]){
                     echo 'Building and pushing docker image to GCR...'
@@ -40,6 +40,12 @@ pipeline{
                     export PATH=$PATH:${GCLOUD_PATH}
                     gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                     gcloud config set project ${GCP_PROJECT}
+
+                    gcloud artifacts repositories describe ${AR_REPO} --location=${AR_REGION} || \
+                    gcloud artifacts repositories create ${AR_REPO} \
+                    --repository-format=docker \
+                    --location=${AR_REGION} \
+                    --description="Docker images for hotel reservation project"
                     gcloud auth configure-docker ${AR_REGION}-docker.pkg.dev --quiet
                     docker build -t ${AR_REGION}-docker.pkg.dev/${GCP_PROJECT}/${AR_REPO}/${IMAGE_NAME}:v1 .
                     docker push ${AR_REGION}-docker.pkg.dev/${GCP_PROJECT}/${AR_REPO}/${IMAGE_NAME}:v1
@@ -57,7 +63,7 @@ pipeline{
                         gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                         gcloud config set project ${GCP_PROJECT}
 
-                        gcloud run deploy hotel-reservation-project \
+                        gcloud run deploy ${IMAGE_NAME} \
                             --image=${AR_REGION}-docker.pkg.dev/${GCP_PROJECT}/${AR_REPO}/${IMAGE_NAME}:v1 \
                             --platform=managed \
                             --region=${AR_REGION} \
